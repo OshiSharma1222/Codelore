@@ -4,7 +4,7 @@ import React from "react";
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
-  content: string;
+  content: string | any[];
 }
 
 export function MessageBubble({ role, content }: MessageBubbleProps) {
@@ -16,7 +16,15 @@ export function MessageBubble({ role, content }: MessageBubbleProps) {
         <span className="text-xs font-bold uppercase text-zinc-500 block mb-1">
           {isUser ? "You" : "AI Navigator"}
         </span>
-        <p className="text-sm leading-relaxed">{content}</p>
+        <div className="text-sm leading-relaxed">
+          {Array.isArray(content) ? (
+            content.map((part, i) =>
+              part.type === "text" ? <p key={i}>{part.text}</p> : null
+            )
+          ) : (
+            <p>{String(content)}</p>
+          )}
+        </div>
       </div>
     </div>
   );

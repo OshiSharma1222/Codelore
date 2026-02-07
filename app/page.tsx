@@ -28,7 +28,11 @@ export default function Home() {
       await sendThreadMessage(text);
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("Failed to send message to AI. Please check the console and your API Key.");
+      // Log full error details for debugging
+      if (typeof error === 'object' && error !== null) {
+        console.error("Error details:", JSON.stringify(error, null, 2));
+      }
+      alert("Failed to send message to AI. Please check the console for details.");
     }
   };
 
@@ -83,12 +87,12 @@ export default function Home() {
             <React.Fragment key={msg.id}>
               {/* User message */}
               {msg.role === "user" && msg.content && (
-                <MessageBubble role="user" content={String(msg.content)} />
+                <MessageBubble role="user" content={msg.content} />
               )}
 
               {/* AI text response */}
               {msg.role === "assistant" && msg.content && (
-                <MessageBubble role="assistant" content={String(msg.content)} />
+                <MessageBubble role="assistant" content={msg.content} />
               )}
 
               {/* AI generative component */}
