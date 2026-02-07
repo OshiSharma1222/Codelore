@@ -5,11 +5,11 @@ import { fileSummaries } from "@/lib/mock-data";
 import { ComicPanel } from "@/components/ui/ComicPanel";
 
 interface FileSummaryProps {
-  filename: string;
-  title: string;
+  filename?: string;
+  title?: string;
 }
 
-export function FileSummary({ filename, title }: FileSummaryProps) {
+export function FileSummary({ filename = "unknown.ts", title = "FILE DETAILS" }: FileSummaryProps) {
   const info = fileSummaries[filename];
 
   if (!info) {
@@ -36,11 +36,10 @@ export function FileSummary({ filename, title }: FileSummaryProps) {
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold uppercase text-zinc-500">Importance:</span>
           <span
-            className={`inline-block rounded-full px-3 py-0.5 text-xs font-bold border-2 border-black ${
-              info.importance === "Critical"
+            className={`inline-block rounded-full px-3 py-0.5 text-xs font-bold border-2 border-black ${info.importance === "Critical"
                 ? "bg-red-100 text-red-800"
                 : "bg-yellow-100 text-yellow-800"
-            }`}
+              }`}
           >
             {info.importance}
           </span>

@@ -4,11 +4,11 @@ import React from "react";
 import { ComicPanel } from "@/components/ui/ComicPanel";
 
 interface GuidanceCardProps {
-  message: string;
-  suggestions: string[];
+  message?: string;
+  suggestions?: string[];
 }
 
-export function GuidanceCard({ message, suggestions }: GuidanceCardProps) {
+export function GuidanceCard({ message = "How can I help you?", suggestions = [] }: GuidanceCardProps) {
   return (
     <ComicPanel title="💡 GUIDE" color="#FFD600">
       <div className="space-y-4">

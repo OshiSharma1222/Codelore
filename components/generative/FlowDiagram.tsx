@@ -5,7 +5,7 @@ import { authFlowSteps, authFlowConnections } from "@/lib/mock-data";
 import { ComicPanel } from "@/components/ui/ComicPanel";
 
 interface FlowDiagramProps {
-  title: string;
+  title?: string;
 }
 
 const stepColors = [
@@ -18,7 +18,7 @@ const stepColors = [
   "#7b1fa2", // purple - frontend
 ];
 
-export function FlowDiagram({ title }: FlowDiagramProps) {
+export function FlowDiagram({ title = "AUTH FLOW" }: FlowDiagramProps) {
   return (
     <ComicPanel title={title} color="#e53935">
       <div className="flex flex-col items-center gap-0 py-4">

@@ -5,9 +5,9 @@ import { repoTree, FileNode } from "@/lib/mock-data";
 import { ComicPanel } from "@/components/ui/ComicPanel";
 
 interface TreeViewProps {
-  filter: string;
-  highlightImportant: boolean;
-  title: string;
+  filter?: string;
+  highlightImportant?: boolean;
+  title?: string;
 }
 
 const moduleFilterMap: Record<string, string[]> = {
@@ -78,7 +78,7 @@ function TreeNode({ node, depth, highlightImportant }: { node: FileNode; depth: 
   );
 }
 
-export function TreeView({ filter = "all", highlightImportant = true, title }: TreeViewProps) {
+export function TreeView({ filter = "all", highlightImportant = true, title = "FOLDER STRUCTURE" }: TreeViewProps) {
   const filtered = filterTree(repoTree, filter);
 
   if (!filtered) {

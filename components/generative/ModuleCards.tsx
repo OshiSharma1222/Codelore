@@ -5,8 +5,8 @@ import { modules } from "@/lib/mock-data";
 import { ComicPanel } from "@/components/ui/ComicPanel";
 
 interface ModuleCardsProps {
-  filter: string;
-  title: string;
+  filter?: string;
+  title?: string;
 }
 
 const filterMap: Record<string, string[]> = {
@@ -18,7 +18,7 @@ const filterMap: Record<string, string[]> = {
   services: ["Services"],
 };
 
-export function ModuleCards({ filter = "all", title }: ModuleCardsProps) {
+export function ModuleCards({ filter = "all", title = "PROJECT OVERVIEW" }: ModuleCardsProps) {
   const normalizedFilter = filter.toLowerCase();
   const activeFilter = filterMap[normalizedFilter] ? normalizedFilter : "all";
   const visible = modules.filter((m) => filterMap[activeFilter]?.includes(m.name));
