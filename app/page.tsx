@@ -1,65 +1,116 @@
-import Image from "next/image";
+"use client";
+
+import React, { useRef, useEffect } from "react";
+import { useTamboThread } from "@tambo-ai/react";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { MessageBubble } from "@/components/chat/MessageBubble";
+import { LoadingDots } from "@/components/chat/LoadingDots";
+
+const WELCOME_SUGGESTIONS = [
+  "Explain this project",
+  "Show folder structure",
+  "Focus on backend",
+  "Only auth flow",
+  "What does login.ts do?",
+];
 
 export default function Home() {
+  const { thread, sendThreadMessage, isIdle } = useTamboThread();
+  const isLoading = !isIdle;
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [thread?.messages, isLoading]);
+
+  const handleSend = async (text: string) => {
+    try {
+      await sendThreadMessage(text);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      alert("Failed to send message to AI. Please check the console and your API Key.");
+    }
+  };
+
+  const messages = thread?.messages ?? [];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex min-h-screen flex-col bg-[var(--color-comic-white)]">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b-4 border-black bg-[#FFD600] px-4 py-3">
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🗺️</span>
+            <h1 className="font-[var(--font-bangers)] text-2xl tracking-wider">
+              AI CODEBASE NAVIGATOR
+            </h1>
+          </div>
+          <span className="comic-border rounded-full bg-white px-3 py-1 text-xs font-bold">
+            GENERATIVE UI
+          </span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* Messages Area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="mx-auto max-w-4xl space-y-4">
+          {/* Welcome state when no messages */}
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 text-center comic-enter">
+              <span className="text-6xl mb-4">💬</span>
+              <h2 className="font-[var(--font-bangers)] text-3xl tracking-wider mb-2">
+                TALK TO YOUR CODEBASE!
+              </h2>
+              <p className="text-zinc-600 text-base mb-6 max-w-md">
+                Ask anything about the project. The UI will transform based on what you want to understand.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {WELCOME_SUGGESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => handleSend(s)}
+                    className="comic-border rounded-full bg-white px-4 py-2 text-sm font-semibold hover:bg-yellow-50 active:scale-95 transition-all"
+                  >
+                    &ldquo;{s}&rdquo;
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Render messages */}
+          {messages.map((msg) => (
+            <React.Fragment key={msg.id}>
+              {/* User message */}
+              {msg.role === "user" && msg.content && (
+                <MessageBubble role="user" content={String(msg.content)} />
+              )}
+
+              {/* AI text response */}
+              {msg.role === "assistant" && msg.content && (
+                <MessageBubble role="assistant" content={String(msg.content)} />
+              )}
+
+              {/* AI generative component */}
+              {msg.role === "assistant" && msg.renderedComponent && (
+                <div className="comic-enter">
+                  {msg.renderedComponent}
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+
+          {/* Loading */}
+          {isLoading && <LoadingDots />}
         </div>
-      </main>
+      </div>
+
+      {/* Fixed Input */}
+      <div className="sticky bottom-0 border-t-4 border-black bg-white px-4 py-4">
+        <div className="mx-auto max-w-4xl">
+          <ChatInput onSend={handleSend} disabled={isLoading} />
+        </div>
+      </div>
     </div>
   );
 }
