@@ -1,13 +1,37 @@
-import { type TamboComponent } from "@tambo-ai/react";
-import { TreeView } from "@/components/generative/TreeView";
-import { ModuleCards } from "@/components/generative/ModuleCards";
-import { FlowDiagram } from "@/components/generative/FlowDiagram";
-import { FileSummary } from "@/components/generative/FileSummary";
-import { GuidanceCard } from "@/components/generative/GuidanceCard";
 import { CodeFlowGraph } from "@/components/generative/CodeFlowGraph";
+import { FileSummary } from "@/components/generative/FileSummary";
+import { FlowDiagram } from "@/components/generative/FlowDiagram";
+import { GenerativeTable } from "@/components/generative/GenerativeTable";
+import { GuidanceCard } from "@/components/generative/GuidanceCard";
+import { ModuleCards } from "@/components/generative/ModuleCards";
+import { TreeView } from "@/components/generative/TreeView";
+import { type TamboComponent } from "@tambo-ai/react";
+import { ProjectGraph } from "@/components/generative/ProjectGraph";
 import { z } from "zod";
 
 export const componentRegistry: TamboComponent[] = [
+  {
+    name: "GenerativeTable",
+    description:
+      "Displays structured data in a table format. Use when the user asks for a 'table', 'list', 'comparison', 'matrix', or 'grid' of data. Suitable for listing API endpoints, database schemas, configuration options, dependencies, or any structured data that fits in rows and columns.",
+    component: GenerativeTable,
+    propsSchema: z.object({
+      title: z.string().optional().default("DATA TABLE").describe("Title of the table"),
+      description: z.string().optional().describe("Optional description of what the table shows"),
+      columns: z.array(
+        z.object({
+          header: z.string().optional().default("").describe("Header text for the column"),
+          width: z.string().optional().describe("CSS width (e.g. '20%', '100px')"),
+          align: z.string().optional().default("left").describe("Text alignment for the column (left, center, right)"),
+        })
+      ).optional().default([]).describe("Column definitions"),
+      rows: z.array(
+        z.object({
+          values: z.array(z.string().optional().default("")).optional().default([]).describe("Array of cell values corresponding to the column order"),
+        })
+      ).optional().default([]).describe("Data rows for the table"),
+    }),
+  },
   {
     name: "ModuleCards",
     description:
@@ -27,15 +51,16 @@ export const componentRegistry: TamboComponent[] = [
       modules: z
         .array(
           z.object({
-            name: z.string().describe("Name of the module, e.g. 'Next.js Frontend', 'Node.js Backend'"),
-            description: z.string().describe("Brief description of what this module does"),
-            files: z.array(z.string()).describe("List of key files in this module"),
-            dependencies: z.array(z.string()).optional().describe("List of other modules this module depends on"),
-            color: z.string().optional().describe("Hex color code for the module tag"),
+            name: z.string().optional().default("Unknown Module").describe("Name of the module, e.g. 'Next.js Frontend', 'Node.js Backend'"),
+            description: z.string().optional().default("").describe("Brief description of what this module does"),
+            files: z.array(z.string()).optional().default([]).describe("List of key files in this module"),
+            dependencies: z.array(z.string()).optional().default([]).describe("List of other modules this module depends on"),
+            color: z.string().optional().default("#000000").describe("Hex color code for the module tag"),
             type: z.enum(['frontend', 'backend', 'database', 'config', 'tests', 'docs']).optional().describe("Module type for filtering"),
           })
         )
         .optional()
+        .nullable()
         .describe("Optional custom modules. If omitted, will use real repository analysis or fall back to mock data."),
     }),
   },
@@ -78,41 +103,72 @@ export const componentRegistry: TamboComponent[] = [
   {
     name: "CodeFlowGraph",
     description:
-      "Shows a detailed code-level flow diagram with actual code snippets, highlighted function calls, and arrows connecting code blocks across columns. Use when user asks for 'code flow', 'how does X work step by step', 'show me the initialization flow', 'trace the code path', 'entry point flow', 'startup sequence', 'request lifecycle', or any request for a visual code walkthrough with actual code. This is more detailed than FlowDiagram — it shows real code, not just labels. Generate columns for logical stages (e.g. 'Entry Point', 'Initialization', 'Service Layer') and populate each with code blocks containing realistic code snippets from the connected repository.",
+      "ALWAYS use this component when the user asks about any kind of flow, lifecycle, trace, sequence, pipeline, or 'how does X work'. Shows a visual diagram with code snippets in columns connected by arrows. Use for: 'show database flow', 'request lifecycle', 'trace the code path', 'how does auth work', 'show startup flow', 'API flow', 'show me the flow for X'. NEVER respond with plain text for flow questions — ALWAYS render this component instead.",
     component: CodeFlowGraph,
     propsSchema: z.object({
       title: z
         .string()
+        .nullish()
         .optional()
-        .default("CODE FLOW")
-        .describe("A comic-style title, e.g. 'STARTUP FLOW!', 'REQUEST LIFECYCLE!', 'ENTRY POINT TRACE!'"),
+        .describe("Comic-style title like 'REQUEST LIFECYCLE!' or 'DATABASE FLOW!'"),
       columns: z
-        .array(
-          z.object({
-            title: z.string().describe("Column stage name, e.g. 'Entry Point', 'Initialization', 'Service Layer'"),
-            color: z.string().describe("Background color hex for the column header, e.g. '#FFD600' (yellow), '#bbdefb' (light blue), '#c8e6c9' (light green)"),
-            blocks: z.array(
-              z.object({
-                id: z.string().describe("Unique ID for the block, e.g. 'main', 'startup', 'createServices'"),
-                label: z.string().describe("Label shown above code, e.g. 'private async startup()', 'main(): void'"),
-                code: z.string().describe("The actual code snippet to display. Use realistic code with function calls, try/catch, await, etc. Keep to 4-10 lines. Use \\n for newlines."),
-                highlights: z.array(z.string()).optional().describe("Function names or keywords to highlight in the code with a blue background, e.g. ['startup', 'createServices']"),
-                description: z.string().optional().describe("Optional short explanation shown below the code block"),
-              })
-            ).describe("Code blocks within this column. Each block shows a code snippet with optional highlights."),
-          })
-        )
-        .describe("Columns representing stages in the code flow. Arrange left-to-right for the logical progression."),
-      connections: z
-        .array(
-          z.object({
-            from: z.string().describe("ID of the source code block"),
-            to: z.string().describe("ID of the target code block"),
-            label: z.string().optional().describe("Arrow label, e.g. 'calls', 'returns', 'awaits'"),
-          })
-        )
+        .any()
         .optional()
-        .describe("Arrows connecting code blocks to show the flow between them."),
+        .describe(`REQUIRED: An array of 2-4 column objects. NEVER leave this empty. Each column MUST have: title (string), color (hex string), blocks (non-empty array). Example: [{"title":"Entry Point","color":"#FFD600","blocks":[{"id":"main","label":"main()","code":"async function main() {\n  const app = createApp();\n  await app.listen(3000);\n}","highlights":["createApp"],"description":"App entry"}]},{"title":"Service Layer","color":"#bbdefb","blocks":[{"id":"svc","label":"createApp()","code":"function createApp() {\n  const router = new Router();\n  return router;\n}","highlights":["Router"]}]}]`),
+      connections: z
+        .any()
+        .optional()
+        .describe(`Array of arrow objects connecting blocks by ID. Example: [{"from":"main","to":"svc","label":"calls"},{"from":"svc","to":"db","label":"queries"}]`),
+    }),
+  },
+  {
+    name: "ProjectGraph",
+    description:
+      "Creates an intelligent, interactive graph visualization of the entire project structure with AI-driven layout, styling, and relationship analysis. Use when user asks to 'visualize the project', 'show project graph', 'create architecture diagram', 'show dependencies', or 'map the codebase'. AI can specify nodes, edges, layout, and styling for optimal visualization.",
+    component: ProjectGraph,
+    propsSchema: z.object({
+      title: z.string().optional().default("PROJECT MAP").describe("Title of the graph, e.g. 'PROJECT MAP', 'ARCHITECTURE DIAGRAM', 'DEPENDENCY GRAPH'"),
+      initialNodes: z.array(
+        z.object({
+          id: z.string().describe("Unique ID for the node"),
+          label: z.string().describe("Display label for the node"),
+          type: z.enum(["frontend", "backend", "database", "api", "config", "tests", "entry", "utils", "services", "routes", "controllers"]).describe("Type of module for icon and color mapping"),
+          description: z.string().optional().describe("Brief description of what this module does"),
+          files: z.array(z.string()).optional().describe("Key files in this module"),
+          importance: z.enum(["high", "medium", "low"]).optional().describe("Importance level for visual emphasis"),
+          position: z.object({ x: z.number().default(0), y: z.number().default(0) }).optional().describe("X/Y coordinates - if not provided, AI will auto-layout"),
+          style: z.object({
+            color: z.string().optional().describe("Custom color override"),
+            icon: z.string().optional().describe("Custom icon name"),
+            size: z.enum(["small", "medium", "large"]).optional().default("medium").describe("Node size"),
+          }).optional().describe("Visual styling options"),
+        })
+      ).optional().default([]).describe("Nodes in the graph - AI can create these based on repository analysis"),
+      initialEdges: z.array(
+        z.object({
+          id: z.string().describe("Unique ID for the edge"),
+          source: z.string().describe("ID of the source node"),
+          target: z.string().describe("ID of the target node"),
+          label: z.string().optional().describe("Label on the connection line"),
+          type: z.enum(["import", "data-flow", "api-call", "dependency"]).optional().default("dependency").describe("Type of relationship for styling"),
+          animated: z.boolean().optional().default(true).describe("Whether the edge should be animated"),
+          style: z.object({
+            color: z.string().optional().describe("Custom edge color"),
+            width: z.number().optional().default(2).describe("Edge thickness"),
+            dashArray: z.string().optional().describe("Dash pattern for dashed lines"),
+          }).optional().describe("Edge styling options"),
+        })
+      ).optional().default([]).describe("Connections between nodes - AI determines relationships"),
+      layout: z.object({
+        direction: z.enum(["horizontal", "vertical", "radial"]).optional().default("horizontal").describe("Layout direction"),
+        spacing: z.number().optional().default(350).describe("Spacing between nodes"),
+        algorithm: z.enum(["hierarchical", "force", "circular"]).optional().default("hierarchical").describe("Layout algorithm to use"),
+      }).optional().describe("Layout configuration for optimal node arrangement"),
+      style: z.object({
+        theme: z.enum(["modern", "brutal", "minimal", "colorful"]).optional().default("modern").describe("Visual theme - modern has gradients and shadows, brutal has black borders"),
+        background: z.enum(["grid", "dots", "solid"]).optional().default("dots").describe("Background pattern"),
+        animations: z.boolean().optional().default(true).describe("Enable animations and transitions"),
+      }).optional().describe("Overall visual styling and theme"),
     }),
   },
   {
@@ -124,6 +180,7 @@ export const componentRegistry: TamboComponent[] = [
       filename: z
         .string()
         .optional()
+        .default("unknown.ts")
         .describe(
           "The filename to explain, e.g. 'login.ts', 'authMiddleware.ts', 'routes.ts'."
         ),
@@ -134,6 +191,18 @@ export const componentRegistry: TamboComponent[] = [
         .describe(
           "A comic-style title, e.g. 'FILE BREAKDOWN!' or 'INSIDE login.ts!'"
         ),
+      role: z
+        .string()
+        .optional()
+        .describe("The role of the file, e.g. 'Authentication Config', 'Helper Utility', 'Main Entry Point'"),
+      description: z
+        .string()
+        .optional()
+        .describe("A detailed explanation of what the file does, its key functions, and its importance in the project."),
+      importance: z
+        .enum(["Critical", "High", "Medium", "Low"])
+        .optional()
+        .describe("How important this file is to the overall project."),
     }),
   },
   {

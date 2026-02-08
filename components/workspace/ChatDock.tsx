@@ -1,13 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { MessageSquare, Zap, Target, MoreHorizontal } from "lucide-react";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { LoadingDots } from "@/components/chat/LoadingDots";
 import { MessageBubble } from "@/components/chat/MessageBubble";
-import { useRef, useEffect } from "react";
 import { useRepo } from "@/components/providers/RepoProvider";
 import { useTamboThread } from "@tambo-ai/react";
+import { MoreHorizontal, Target, Zap } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
 
 
 export function ChatDock() {
@@ -16,7 +15,7 @@ export function ChatDock() {
 
   const { thread, sendThreadMessage, isIdle } = useTamboThread();
 
-  const messages = thread?.messages ?? [];
+  const messages = useMemo(() => thread?.messages ?? [], [thread?.messages]);
   const sendMessage = sendThreadMessage;
   const isLoading = !isIdle;
 
@@ -35,7 +34,6 @@ export function ChatDock() {
 
     if (repoData && !hasSentContext.current && !isLoading) {
       console.log("Injecting repo context to AI...");
-      const fileList = repoData.files.filter(f => f.type === "file").map(f => f.path).join("\n");
       
       const moduleSummary = repoData.modules?.length 
         ? repoData.modules.map(m => 
@@ -51,18 +49,31 @@ export function ChatDock() {
         ? `Frameworks: ${repoData.stats.frameworks.join(", ")}`
         : "";
 
-      const contextMessage = `I have connected to the repository "${repoData.repo.owner}/${repoData.repo.name}" (${repoData.repo.description || "no description"}).
-${langInfo}
-${frameworkInfo}
-Total files: ${repoData.stats.totalFiles}, Total folders: ${repoData.stats.totalFolders}
+      // Limit file list to avoid Tambo API payload limits
+      const trimmedFileList = repoData.files
+        .filter(f => f.type === "file")
+        .map(f => f.path)
+        .slice(0, 80)
+        .join("\n");
+      const fileCount = repoData.files.filter(f => f.type === "file").length;
+      const truncatedNote = fileCount > 80 ? `\n... and ${fileCount - 80} more files` : "";
 
-Detected Modules:
+      const contextMessage = `Repository: ${repoData.repo.owner}/${repoData.repo.name} (${repoData.repo.description || "no description"}).
+${langInfo} ${frameworkInfo}
+Files: ${repoData.stats.totalFiles}, Folders: ${repoData.stats.totalFolders}
+
+Modules:
 ${moduleSummary}
 
-File structure (paths):
-${fileList}
+Key files:
+${trimmedFileList}${truncatedNote}
 
-IMPORTANT: The repository data is already loaded. When I ask for "folder structure" or "file tree", render the TreeView component — it will automatically read the real file data from context. When I ask for "architecture" or "modules", render ModuleCards — it will automatically show the detected modules. Do NOT generate fake/mock data. The components pull real data from the connected repository.`;
+RULES:
+1. "folder structure" / "file tree" → render TreeView
+2. "architecture" / "modules" / "explain project" → render ModuleCards
+3. ANY flow/lifecycle/trace/sequence/"how does X work" → render CodeFlowGraph with columns containing code blocks. You MUST populate the columns array with objects like {title:"Stage", color:"#FFD600", blocks:[{id:"b1", label:"functionName()", code:"actual code here"}]} and connections like [{from:"b1", to:"b2", label:"calls"}]. NEVER leave columns empty.
+4. "show project graph" / "visualize architecture" / "dependency map" → render ProjectGraph with nodes and edges.
+5. Use real file paths from above. Do NOT generate fake data.`;
 
       sendMessage(contextMessage);
       hasSentContext.current = true;
@@ -137,7 +148,7 @@ IMPORTANT: The repository data is already loaded. When I ask for "folder structu
 
         {messages.map((msg) => (
           <div key={msg.id} className="space-y-1">
-            <MessageBubble role={msg.role} content={msg.content} />
+            <MessageBubble role={msg.role} content={Array.isArray(msg.content) ? msg.content.map(part => 'text' in part ? part.text : '').join('') : msg.content} />
           </div>
         ))}
 

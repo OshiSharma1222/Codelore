@@ -4,6 +4,7 @@ import "./globals.css";
 import { TamboProviderWrapper } from "@/components/providers/TamboProviderWrapper";
 import { RepoProvider } from "@/components/providers/RepoProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { WorkspaceTabsProvider } from "@/components/providers/WorkspaceTabsProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,7 +33,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <RepoProvider>
-            <TamboProviderWrapper>{children}</TamboProviderWrapper>
+            <WorkspaceTabsProvider>
+              <TamboProviderWrapper>{children}</TamboProviderWrapper>
+            </WorkspaceTabsProvider>
           </RepoProvider>
         </ThemeProvider>
       </body>
