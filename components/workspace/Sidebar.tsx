@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Folder, FileCode, Beaker, BookOpen, ChevronRight, Star, Layers, Activity, GitBranch, Terminal } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useRepo } from "@/components/providers/RepoProvider";
+import { RepoStatus } from "@/components/workspace/RepoStatus";
 import { buildFileTree, TreeNode } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { Activity, ChevronRight, FileCode, Folder, GitBranch, Layers, Star, Terminal } from "lucide-react";
+import { useMemo, useState } from "react";
 
 type Tab = "FILES" | "INSIGHTS" | "DOCS";
 
@@ -19,6 +20,9 @@ export function Sidebar() {
 
   return (
     <aside className="w-72 border-r-2 border-brutal-black bg-white flex flex-col h-[calc(100vh-3.5rem)] sticky top-14">
+      {/* Repository Status */}
+      <RepoStatus />
+      
       {/* Tab Switcher */}
       <div className="flex border-b-2 border-brutal-black">
         {(["FILES", "INSIGHTS", "DOCS"] as Tab[]).map((tab) => (

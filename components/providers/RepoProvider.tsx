@@ -1,11 +1,20 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 export interface RepoFile {
   path: string;
   type: "file" | "directory";
   size: number;
+}
+
+export interface Module {
+  name: string;
+  description: string;
+  files: string[];
+  dependencies: string[];
+  color: string;
+  type: "frontend" | "backend" | "database" | "config" | "tests" | "docs";
 }
 
 export interface RepoData {
@@ -16,11 +25,15 @@ export interface RepoData {
     description: string;
     stars: number;
     url: string;
+    language: string;
   };
   files: RepoFile[];
+  modules: Module[];
   stats: {
     totalFiles: number;
     totalFolders: number;
+    languages: string[];
+    frameworks: string[];
   };
 }
 
