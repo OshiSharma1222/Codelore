@@ -308,32 +308,6 @@ codelore/
 </tr>
 </table>
 
-### Why These Technologies?
-
-```mermaid
-mindmap
-  root((Codelore Tech Stack))
-    Next.js 16
-      App Router
-      Turbopack
-      Server Actions
-    React 19
-      New Hooks
-      Concurrent Features
-    Tambo AI
-      Generative UI
-      Component Streaming
-      Schema Validation
-    GitHub API
-      Real-time Analysis
-      Module Detection
-      Dependency Graph
-    Tailwind 4
-      Dark Theme
-      Comic Style
-      Responsive
-```
-
 ## Key Features Deep Dive
 
 ### 1. Dynamic Project Graph
@@ -403,16 +377,6 @@ Codelore uses a **comic/brutal design system** inspired by developer tools that 
 - **Neon accent colors for graphs**
 - **Comic Neue & Bangers fonts**
 - **High-contrast readable text**
-
-```mermaid
-pie title Color Palette Usage
-    "Primary Blue" : 20
-    "Success Green" : 20
-    "Warning Orange" : 15
-    "Purple" : 15
-    "Teal" : 15
-    "Gray" : 15
-```
 
 ## Configuration
 
