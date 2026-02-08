@@ -14,7 +14,6 @@ export function ChatDock() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { repoData } = useRepo();
 
-  // 🔥 THIS IS THE KEY
   const { thread, sendThreadMessage, isIdle } = useTamboThread();
 
   const messages = thread?.messages ?? [];
@@ -25,18 +24,45 @@ export function ChatDock() {
 
   // Inject Repo Context
   const hasSentContext = useRef(false);
+  const lastRepoUrl = useRef<string | null>(null);
 
   useEffect(() => {
+    // Reset context flag if a different repo is connected
+    if (repoData?.repo?.url !== lastRepoUrl.current) {
+      hasSentContext.current = false;
+      lastRepoUrl.current = repoData?.repo?.url ?? null;
+    }
+
     if (repoData && !hasSentContext.current && !isLoading) {
       console.log("Injecting repo context to AI...");
-      const fileList = repoData.files.map(f => f.path).join("\n");
-      const contextMessage = `I have connected to the repository ${repoData.repo.owner}/${repoData.repo.name}.
-Here is the full file structure:
+      const fileList = repoData.files.filter(f => f.type === "file").map(f => f.path).join("\n");
+      
+      const moduleSummary = repoData.modules?.length 
+        ? repoData.modules.map(m => 
+            `- ${m.name} (${m.type}): ${m.description} | Files: ${m.files.slice(0, 5).join(", ")}`
+          ).join("\n")
+        : "No modules detected yet.";
+
+      const langInfo = repoData.stats?.languages?.length
+        ? `Languages: ${[...new Set(repoData.stats.languages)].join(", ")}`
+        : "";
+
+      const frameworkInfo = repoData.stats?.frameworks?.length
+        ? `Frameworks: ${repoData.stats.frameworks.join(", ")}`
+        : "";
+
+      const contextMessage = `I have connected to the repository "${repoData.repo.owner}/${repoData.repo.name}" (${repoData.repo.description || "no description"}).
+${langInfo}
+${frameworkInfo}
+Total files: ${repoData.stats.totalFiles}, Total folders: ${repoData.stats.totalFolders}
+
+Detected Modules:
+${moduleSummary}
+
+File structure (paths):
 ${fileList}
 
-Please analyze this structure. When I ask for specific views (like "Show architecture" or "Show file tree"), use this data to generate the response.
-For ModuleCards, generate a logical breakdown of modules based on these files.
-For TreeView, use the actual file paths provided here.`;
+IMPORTANT: The repository data is already loaded. When I ask for "folder structure" or "file tree", render the TreeView component — it will automatically read the real file data from context. When I ask for "architecture" or "modules", render ModuleCards — it will automatically show the detected modules. Do NOT generate fake/mock data. The components pull real data from the connected repository.`;
 
       sendMessage(contextMessage);
       hasSentContext.current = true;

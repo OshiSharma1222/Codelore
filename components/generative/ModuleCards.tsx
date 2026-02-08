@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { modules } from "@/lib/mock-data";
+import { useRepo } from "@/components/providers/RepoProvider";
 import { ComicPanel } from "@/components/ui/ComicPanel";
+import { modules } from "@/lib/mock-data";
 
 interface Module {
   name: string;
@@ -28,23 +28,34 @@ const filterMap: Record<string, string[]> = {
 };
 
 export function ModuleCards({ filter = "all", title = "PROJECT OVERVIEW", modules: aiModules }: ModuleCardsProps) {
-  // Use AI provided modules if available, otherwise fallback to mock (or empty)
-  const data = aiModules || modules;
+  const { repoData } = useRepo();
+  
+  // Priority: AI provided modules -> Real repository modules -> Mock data fallback
+  const data = aiModules || repoData?.modules || modules;
 
   const normalizedFilter = filter.toLowerCase();
 
-  // If filter is specific and we have mock data map, use it. 
-  // But for AI data, we might need a generic filter.
-  // For now, if AI provides data, we just show all of it unless filter logic is generic.
-  // Let's implement a simple generic filter if possible, or just show all for AI data as it's likely pre-filtered by generic prompt or just small enough.
-
-  const visible = aiModules
-    ? aiModules
-    : modules.filter((m) => {
-      const activeFilter = filterMap[normalizedFilter] ? normalizedFilter : "all";
-      if (activeFilter === "all") return true;
-      return filterMap[activeFilter]?.includes(m.name);
-    });
+  // Filter modules based on type for real data, or name for mock data
+  const visible = data.filter((m: any) => {
+    if (normalizedFilter === "all") return true;
+    
+    // For real repository data with types
+    if ('type' in m) {
+      switch (normalizedFilter) {
+        case 'frontend': return m.type === 'frontend';
+        case 'backend': return m.type === 'backend';
+        case 'database': return m.type === 'database';
+        case 'config': return m.type === 'config';
+        case 'tests': return m.type === 'tests';
+        default: return true;
+      }
+    }
+    
+    // Fallback for mock data
+    const activeFilter = filterMap[normalizedFilter] ? normalizedFilter : "all";
+    if (activeFilter === "all") return true;
+    return filterMap[activeFilter]?.includes(m.name);
+  });
 
   return (
     <ComicPanel title={title} color="#FFD600">
