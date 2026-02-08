@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🗺️ Codelore
+# Codelore
 
 **AI-Powered Codebase Navigator with Generative UI**
 
@@ -12,24 +12,24 @@
 
 *Talk to your codebase. Watch it visualize itself.*
 
-[Features](#-features) • [Demo](#-demo) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack)
+[Features](#features) • [Demo](#demo) • [Quick Start](#quick-start) • [Architecture](#architecture) • [Tech Stack](#tech-stack)
 
 </div>
 
 ---
 
-## 🎯 What is Codelore?
+## What is Codelore?
 
 Codelore is a **conversational developer tool** where AI dynamically reshapes the UI to help you understand large codebases faster. Instead of reading static documentation, you **talk to your codebase** and it shows you relevant visualizations in real-time.
 
 ```mermaid
 graph LR
-    A[👤 You Ask:<br/>"Show me the auth flow"] --> B[🧠 Tambo AI<br/>Processes Query]
-    B --> C[🎨 Generative UI<br/>Renders Components]
-    C --> D1[📊 Flow Diagram]
-    C --> D2[🗺️ Architecture Map]
-    C --> D3[🌳 File Tree]
-    C --> D4[📦 Module Cards]
+    A["You Ask: Show me the auth flow"] --> B["Tambo AI Processes Query"]
+    B --> C["Generative UI Renders Components"]
+    C --> D1[Flow Diagram]
+    C --> D2[Architecture Map]
+    C --> D3[File Tree]
+    C --> D4[Module Cards]
     
     style A fill:#3b82f6,stroke:#1e40af,color:#fff
     style B fill:#8b5cf6,stroke:#6d28d9,color:#fff
@@ -40,13 +40,13 @@ graph LR
     style D4 fill:#06b6d4,stroke:#0891b2,color:#fff
 ```
 
-## ✨ Features
+## Features
 
 <table>
 <tr>
 <td width="50%">
 
-### 🤖 AI-Powered Analysis
+### AI-Powered Analysis
 - Real-time GitHub repository parsing
 - Automatic module & dependency detection
 - Language/framework identification
@@ -55,7 +55,7 @@ graph LR
 </td>
 <td width="50%">
 
-### 🎨 Dynamic Visualizations
+### Dynamic Visualizations
 - **Project Graph** - Interactive architecture map
 - **Code Flow** - Step-by-step execution paths
 - **Module Cards** - Component breakdowns
@@ -66,7 +66,7 @@ graph LR
 <tr>
 <td width="50%">
 
-### 💬 Conversational Interface
+### Conversational Interface
 - Natural language queries
 - Context-aware responses
 - Multi-workspace tabs
@@ -75,7 +75,7 @@ graph LR
 </td>
 <td width="50%">
 
-### 🎯 Developer Experience
+### Developer Experience
 - Comic-style brutal UI
 - Dark theme optimized for coding
 - Zoom & pan on graphs
@@ -85,7 +85,7 @@ graph LR
 </tr>
 </table>
 
-## 🎬 Demo
+## Demo
 
 ### System Architecture Flow
 
@@ -126,10 +126,10 @@ graph TB
     A --> H[FileSummary]
     A --> I[GuidanceCard]
     
-    G --> G1[🗺️ Architecture Map<br/>Column-based layout]
-    F --> F1[📊 Execution Flow<br/>Block connections]
-    C --> C1[📦 Module Breakdown<br/>Dependencies shown]
-    D --> D1[🌳 File Tree<br/>Hierarchical view]
+    G --> G1["Architecture Map - Column-based layout"]
+    F --> F1["Execution Flow - Block connections"]
+    C --> C1["Module Breakdown - Dependencies shown"]
+    D --> D1["File Tree - Hierarchical view"]
     
     style A fill:#6366f1,stroke:#4f46e5,color:#fff,stroke-width:3px
     style G fill:#10b981,stroke:#059669,color:#fff
@@ -138,7 +138,7 @@ graph TB
     style D fill:#14b8a6,stroke:#0d9488,color:#fff
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -166,7 +166,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and start exploring! 🎉
+Open [http://localhost:3000](http://localhost:3000) and start exploring!
 
 ### Using Codelore
 
@@ -187,35 +187,35 @@ Open [http://localhost:3000](http://localhost:3000) and start exploring! 🎉
    - Open multiple workspace tabs
    - Export diagrams
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TB
-    subgraph Frontend["🎨 Frontend Layer"]
+    subgraph Frontend["Frontend Layer"]
         A[Next.js App Router]
         B[React 19]
         C[Tailwind CSS 4]
     end
     
-    subgraph State["📦 State Management"]
+    subgraph State["State Management"]
         D[RepoProvider]
         E[WorkspaceTabsProvider]
         F[TamboThreadProvider]
     end
     
-    subgraph AI["🧠 AI Layer"]
+    subgraph AI["AI Layer"]
         G[Tambo AI SDK]
         H[Component Registry]
         I[Generative UI Engine]
     end
     
-    subgraph API["🔌 API Layer"]
+    subgraph API["API Layer"]
         J[GitHub REST API]
         K[Repository Analyzer]
         L[Module Detector]
     end
     
-    subgraph Components["🎭 Generative Components"]
+    subgraph Components["Generative Components"]
         M[ProjectGraph]
         N[CodeFlowGraph]
         O[ModuleCards]
@@ -258,10 +258,10 @@ codelore/
 │   └── layout.tsx            # Root layout with providers
 ├── components/
 │   ├── generative/           # AI-rendered components
-│   │   ├── ProjectGraph.tsx  # 🗺️ Architecture visualizer
-│   │   ├── CodeFlowGraph.tsx # 📊 Execution flow
-│   │   ├── ModuleCards.tsx   # 📦 Module breakdown
-│   │   └── TreeView.tsx      # 🌳 File explorer
+│   │   ├── ProjectGraph.tsx  # Architecture visualizer
+│   │   ├── CodeFlowGraph.tsx # Execution flow
+│   │   ├── ModuleCards.tsx   # Module breakdown
+│   │   └── TreeView.tsx      # File explorer
 │   ├── workspace/            # Workspace interface
 │   │   ├── ChatDock.tsx      # Chat sidebar
 │   │   ├── InfiniteCanvas.tsx# Visual canvas
@@ -276,7 +276,7 @@ codelore/
     └── utils.ts              # Utilities
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 <table>
 <tr>
@@ -312,7 +312,7 @@ codelore/
 
 ```mermaid
 mindmap
-  root((Codelore<br/>Tech Stack))
+  root((Codelore Tech Stack))
     Next.js 16
       App Router
       Turbopack
@@ -334,7 +334,7 @@ mindmap
       Responsive
 ```
 
-## 📊 Key Features Deep Dive
+## Key Features Deep Dive
 
 ### 1. Dynamic Project Graph
 
@@ -348,12 +348,12 @@ Frontend → Routes/API → Controllers → Services → Database
 ```
 
 **Features:**
-- ✅ Auto-layout by module type
-- ✅ Bezier curve connections with labels
-- ✅ Dark theme with neon glow effects
-- ✅ Zoom & pan controls
-- ✅ Connection dots at endpoints
-- ✅ Edge type legend
+- Auto-layout by module type
+- Bezier curve connections with labels
+- Dark theme with neon glow effects
+- Zoom & pan controls
+- Connection dots at endpoints
+- Edge type legend
 
 ### 2. Code Flow Graph
 
@@ -394,7 +394,7 @@ stateDiagram-v2
     note right of ChatThread1: Context persists<br/>within workspace
 ```
 
-## 🎨 UI Design Philosophy
+## UI Design Philosophy
 
 Codelore uses a **comic/brutal design system** inspired by developer tools that prioritize clarity over polish:
 
@@ -406,15 +406,15 @@ Codelore uses a **comic/brutal design system** inspired by developer tools that 
 
 ```mermaid
 pie title Color Palette Usage
-    "Primary Blue (Frontend)" : 20
-    "Success Green (Backend)" : 20
-    "Warning Orange (API)" : 15
-    "Purple (Database)" : 15
-    "Teal (Services)" : 15
-    "Gray (Config)" : 15
+    "Primary Blue" : 20
+    "Success Green" : 20
+    "Warning Orange" : 15
+    "Purple" : 15
+    "Teal" : 15
+    "Gray" : 15
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -447,7 +447,7 @@ export const registry: TamboRegistry = {
 };
 ```
 
-## 🚢 Deployment
+## Deployment
 
 ### Deploy to Vercel (Recommended)
 
@@ -474,7 +474,7 @@ EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Here's how you can help:
 
@@ -514,11 +514,11 @@ graph LR
    git push origin feature/amazing-feature
    ```
 
-## 📝 License
+## License
 
 MIT License - see [LICENSE](LICENSE) for details
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Tambo AI](https://tambo.ai) - Generative UI framework
 - [Next.js](https://nextjs.org) - React framework
@@ -529,8 +529,8 @@ MIT License - see [LICENSE](LICENSE) for details
 
 <div align="center">
 
-**Built with 🧠 AI & ❤️ by developers, for developers**
+**Built with AI by developers, for developers**
 
-[⭐ Star on GitHub](https://github.com/yourusername/codelore) • [🐛 Report Bug](https://github.com/yourusername/codelore/issues) • [💡 Request Feature](https://github.com/yourusername/codelore/issues)
+[Star on GitHub](https://github.com/yourusername/codelore) • [Report Bug](https://github.com/yourusername/codelore/issues) • [Request Feature](https://github.com/yourusername/codelore/issues)
 
 </div>
