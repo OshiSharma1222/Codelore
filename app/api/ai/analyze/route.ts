@@ -76,6 +76,16 @@ export async function POST(req: NextRequest) {
         });
     } catch (error: any) {
         console.error("AI Analysis Error:", error);
+
+        // Surface a friendly message when Gemini is overloaded
+        const status = error?.status ?? error?.code;
+        if (status === 503 || status === 429) {
+            return NextResponse.json(
+                { error: "The AI model is currently experiencing high demand. Please try again in a moment." },
+                { status: 503 }
+            );
+        }
+
         return NextResponse.json(
             { error: error.message || "Analysis failed" },
             { status: 500 }

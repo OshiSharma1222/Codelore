@@ -3,8 +3,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 // ─── Client ───────────────────────────────────────────────────────────────────
 const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-// gemini-2.5-flash: fast, capable, generous free tier
-// Switch to "gemini-2.5-pro" for deeper analysis if you have a paid plan
 export const GEMINI_MODEL = "gemini-2.5-flash";
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
@@ -110,6 +108,39 @@ Rules:
 - For CodeFlowGraph, always generate 2-4 columns with actual code snippets.
 - For ProjectGraph, generate nodes with proper types and meaningful edges.`;
 
+// ─── Retry Helper ─────────────────────────────────────────────────────────────
+
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 2000;
+
+function isRetryableError(error: any): boolean {
+    const status = error?.status ?? error?.httpStatusCode ?? error?.code;
+    if (status === 503 || status === 429) return true;
+    const msg = String(error?.message ?? "").toLowerCase();
+    return msg.includes("unavailable") || msg.includes("overloaded") || msg.includes("resource exhausted");
+}
+
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+    let lastError: any;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            lastError = error;
+            if (attempt < MAX_RETRIES && isRetryableError(error)) {
+                const delay = BASE_DELAY_MS * Math.pow(2, attempt); // 2s, 4s, 8s
+                console.warn(
+                    `[Gemini] ${label} attempt ${attempt + 1} failed (${error?.status ?? "unknown"}), retrying in ${delay}ms…`
+                );
+                await new Promise((r) => setTimeout(r, delay));
+            } else {
+                throw error;
+            }
+        }
+    }
+    throw lastError;
+}
+
 // ─── API Helpers ──────────────────────────────────────────────────────────────
 
 export interface AnalysisResult {
@@ -150,25 +181,29 @@ export async function analyzeRepoWithGemini(
     repoIndex: string,
     repoMeta: { owner: string; name: string; description?: string }
 ): Promise<AnalysisResult> {
-    const response = await genai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: [
-            {
-                role: "user",
-                parts: [
+    const response = await withRetry(
+        () =>
+            genai.models.generateContent({
+                model: GEMINI_MODEL,
+                contents: [
                     {
-                        text: `Analyze this repository: ${repoMeta.owner}/${repoMeta.name}${repoMeta.description ? ` — ${repoMeta.description}` : ""}\n\nHere is the deep index:\n\n${repoIndex}`,
+                        role: "user",
+                        parts: [
+                            {
+                                text: `Analyze this repository: ${repoMeta.owner}/${repoMeta.name}${repoMeta.description ? ` — ${repoMeta.description}` : ""}\n\nHere is the deep index:\n\n${repoIndex}`,
+                            },
+                        ],
                     },
                 ],
-            },
-        ],
-        config: {
-            systemInstruction: ANALYSIS_SYSTEM_PROMPT,
-            responseMimeType: "application/json",
-            responseSchema: REPO_ANALYSIS_SCHEMA,
-            temperature: 0.2,
-        },
-    });
+                config: {
+                    systemInstruction: ANALYSIS_SYSTEM_PROMPT,
+                    responseMimeType: "application/json",
+                    responseSchema: REPO_ANALYSIS_SCHEMA,
+                    temperature: 0.2,
+                },
+            }),
+        "analyzeRepo"
+    );
 
     const text = response.text || "{}";
     return JSON.parse(text) as AnalysisResult;
@@ -184,15 +219,19 @@ export async function* chatWithGemini(
         parts: [{ text: m.text }],
     }));
 
-    const response = await genai.models.generateContentStream({
-        model: GEMINI_MODEL,
-        contents,
-        config: {
-            systemInstruction: `${CHAT_SYSTEM_PROMPT}\n\n## Repository Context\n${repoContext}`,
-            temperature: 0.4,
-            tools,
-        },
-    });
+    const response = await withRetry(
+        () =>
+            genai.models.generateContentStream({
+                model: GEMINI_MODEL,
+                contents,
+                config: {
+                    systemInstruction: `${CHAT_SYSTEM_PROMPT}\n\n## Repository Context\n${repoContext}`,
+                    temperature: 0.4,
+                    tools,
+                },
+            }),
+        "chat"
+    );
 
     for await (const chunk of response) {
         yield chunk;
